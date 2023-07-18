@@ -18,6 +18,8 @@ public class TodoItemDto : IMapFrom<TodoItem>
 
     public string? Note { get; set; }
 
+    public bool IsDeleted { get; set; }
+
     public void Mapping(Profile profile)
     {
         profile.CreateMap<TodoItem, TodoItemDto>()
