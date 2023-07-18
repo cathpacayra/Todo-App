@@ -10,6 +10,7 @@ public record UpdateTodoListCommand : IRequest
     public int Id { get; init; }
 
     public string? Title { get; init; }
+    public string? Color { get; init; }
 }
 
 public class UpdateTodoListCommandHandler : IRequestHandler<UpdateTodoListCommand>
@@ -32,6 +33,11 @@ public class UpdateTodoListCommandHandler : IRequestHandler<UpdateTodoListComman
         }
 
         entity.Title = request.Title;
+
+        if (!string.IsNullOrEmpty(request.Color) && request.Color == (Domain.ValueObjects.Colour)request.Color)
+        {
+            entity.Colour = (Domain.ValueObjects.Colour)request.Color;
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
 

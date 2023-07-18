@@ -22,18 +22,40 @@ public class GetTodosQueryHandler : IRequestHandler<GetTodosQuery, TodosVm>
 
     public async Task<TodosVm> Handle(GetTodosQuery request, CancellationToken cancellationToken)
     {
+        List<ColorDto> value_2 = new()
+        {
+            new ColorDto { colour = "White", colorCode = "#FFFFFF" },
+            new ColorDto { colour = "Red", colorCode = "#FF5733" },
+            new ColorDto { colour = "Orange", colorCode = "#FFC300" },
+            new ColorDto { colour = "Yellow", colorCode = "#FFFF66" },
+            new ColorDto { colour = "Green", colorCode = "#CCFF99" },
+            new ColorDto { colour = "Blue", colorCode = "#6666FF" },
+            new ColorDto { colour = "Purple", colorCode = "#9966CC" },
+            new ColorDto { colour = "Grey", colorCode = "#999999" },
+        };
+
         return new TodosVm
         {
             PriorityLevels = Enum.GetValues(typeof(PriorityLevel))
-                .Cast<PriorityLevel>()
-                .Select(p => new PriorityLevelDto { Value = (int)p, Name = p.ToString() })
-                .ToList(),
+            .Cast<PriorityLevel>()
+            .Select(p => new PriorityLevelDto { Value = (int)p, Name = p.ToString() })
+            .ToList(),
+            Colours = value_2,
 
             Lists = await _context.TodoLists
-                .AsNoTracking()
-                .ProjectTo<TodoListDto>(_mapper.ConfigurationProvider)
-                .OrderBy(t => t.Title)
-                .ToListAsync(cancellationToken)
+            .AsNoTracking()
+            .ProjectTo<TodoListDto>(_mapper.ConfigurationProvider)
+            .Where(t => t.IsDeletedList == false)
+            .Select(s => new TodoListDto
+            {
+                Colour = s.Colour,
+                Id = s.Id,
+                IsDeletedList = s.IsDeletedList,
+                Title = s.Title,
+                Items = s.Items.Where(c => c.IsDeleted == false).ToList()
+            })
+            .OrderBy(t => t.Title)
+            .ToListAsync(cancellationToken)
         };
     }
 }

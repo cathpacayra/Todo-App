@@ -4,5 +4,6 @@ public class TodosVm
 {
     public IList<PriorityLevelDto> PriorityLevels { get; set; } = new List<PriorityLevelDto>();
 
+    public IList<ColorDto> Colours { get; set; } = new List<ColorDto>();
     public IList<TodoListDto> Lists { get; set; } = new List<TodoListDto>();
 }

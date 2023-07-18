@@ -5,7 +5,7 @@ import {
   TodoListsClient, TodoItemsClient,
   TodoListDto, TodoItemDto, PriorityLevelDto,
   CreateTodoListCommand, UpdateTodoListCommand,
-  CreateTodoItemCommand, UpdateTodoItemDetailCommand
+  CreateTodoItemCommand, UpdateTodoItemDetailCommand, ColorDto
 } from '../web-api-client';
 
 @Component({
@@ -20,6 +20,7 @@ export class TodoComponent implements OnInit {
   deleteCountDownInterval: any;
   lists: TodoListDto[];
   priorityLevels: PriorityLevelDto[];
+  colorLevels: ColorDto[];
   selectedList: TodoListDto;
   selectedItem: TodoItemDto;
   newListEditor: any = {};
@@ -48,6 +49,7 @@ export class TodoComponent implements OnInit {
       result => {
         this.lists = result.lists;
         this.priorityLevels = result.priorityLevels;
+        this.colorLevels = result.colours;
         if (this.lists.length) {
           this.selectedList = this.lists[0];
         }
@@ -58,7 +60,7 @@ export class TodoComponent implements OnInit {
 
   // Lists
   remainingItems(list: TodoListDto): number {
-    return list.items.filter(t => !t.done).length;
+    return list.items.filter(t => !t.done && !t.isDeleted).length;
   }
 
   showNewListModal(template: TemplateRef<any>): void {
@@ -101,7 +103,9 @@ export class TodoComponent implements OnInit {
   showListOptionsModal(template: TemplateRef<any>) {
     this.listOptionsEditor = {
       id: this.selectedList.id,
-      title: this.selectedList.title
+      title: this.selectedList.title,
+      color: this.selectedList.colour
+
     };
 
     this.listOptionsModalRef = this.modalService.show(template);
@@ -114,6 +118,8 @@ export class TodoComponent implements OnInit {
         (this.selectedList.title = this.listOptionsEditor.title),
           this.listOptionsModalRef.hide();
         this.listOptionsEditor = {};
+
+        this.selectedList.colour = list.color;
       },
       error => console.error(error)
     );
@@ -125,6 +131,8 @@ export class TodoComponent implements OnInit {
   }
 
   deleteListConfirmed(): void {
+    const list = this.listOptionsEditor as UpdateTodoListCommand;
+    list.isDeletedList = true;
     this.listsClient.delete(this.selectedList.id).subscribe(
       () => {
         this.deleteListModalRef.hide();
@@ -142,7 +150,7 @@ export class TodoComponent implements OnInit {
 
     this.itemDetailsModalRef = this.modalService.show(template);
     this.itemDetailsModalRef.onHidden.subscribe(() => {
-        this.stopDeleteCountDown();
+      this.stopDeleteCountDown();
     });
   }
 
