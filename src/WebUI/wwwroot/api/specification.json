@@ -206,12 +206,54 @@
         }
       }
     },
-    "/api/TodoLists": {
+    "/api/TodoLists/{text}/{priority}": {
       "get": {
         "tags": [
           "TodoLists"
         ],
         "operationId": "TodoLists_Get",
+        "parameters": [
+          {
+            "name": "text",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 1
+          },
+          {
+            "name": "priority",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TodosVm"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/TodoLists": {
+      "get": {
+        "tags": [
+          "TodoLists"
+        ],
+        "operationId": "TodoLists_Get2",
         "responses": {
           "200": {
             "description": "",
@@ -262,7 +304,7 @@
         "tags": [
           "TodoLists"
         ],
-        "operationId": "TodoLists_Get2",
+        "operationId": "TodoLists_Get3",
         "parameters": [
           {
             "name": "id",

@@ -34,7 +34,8 @@ export class TodoComponent implements OnInit {
     priority: [''],
     note: ['']
   });
-
+  spriority: string | null = '';
+  stext: string | null = '';
 
   constructor(
     private listsClient: TodoListsClient,
@@ -44,7 +45,29 @@ export class TodoComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.listsClient.get().subscribe(
+    this.listsClient.get2().subscribe(
+      result => {
+        this.lists = result.lists;
+        this.priorityLevels = result.priorityLevels;
+        if (this.lists.length) {
+          this.selectedList = this.lists[0];
+        }
+      },
+      error => console.error(error)
+    );
+  }
+
+  searchList(text: string | null, priority: string | null): void {
+    if (text == '' || text == null)
+      text = 'none';
+
+    if (priority == '' || priority == null)
+      priority = 'none';
+
+    this.spriority = priority;
+    this.stext = text;
+    
+    this.listsClient.get(text, priority).subscribe(
       result => {
         this.lists = result.lists;
         this.priorityLevels = result.priorityLevels;
@@ -147,6 +170,7 @@ export class TodoComponent implements OnInit {
   }
 
   updateItemDetails(): void {
+
     const item = new UpdateTodoItemDetailCommand(this.itemDetailsFormGroup.value);
     this.itemsClient.updateItemDetails(this.selectedItem.id, item).subscribe(
       () => {
@@ -165,9 +189,22 @@ export class TodoComponent implements OnInit {
         this.selectedItem.note = item.note;
         this.itemDetailsModalRef.hide();
         this.itemDetailsFormGroup.reset();
+
+        this.listsClient.get(this.stext, this.spriority).subscribe(
+          result => {
+            this.lists = result.lists;
+            this.priorityLevels = result.priorityLevels;
+            if (this.lists.length) {
+              this.selectedList = this.lists[0];
+            }
+          },
+          error => console.error(error)
+        );
       },
       error => console.error(error)
     );
+
+  
   }
 
   addItem() {
