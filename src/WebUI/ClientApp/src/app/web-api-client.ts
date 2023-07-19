@@ -307,9 +307,10 @@ export class TodoItemsClient implements ITodoItemsClient {
 }
 
 export interface ITodoListsClient {
-    get(): Observable<TodosVm>;
+    get(text: string | null, priority: string | null): Observable<TodosVm>;
+    get2(): Observable<TodosVm>;
     create(command: CreateTodoListCommand): Observable<number>;
-    get2(id: number): Observable<FileResponse>;
+    get3(id: number): Observable<FileResponse>;
     update(id: number, command: UpdateTodoListCommand): Observable<FileResponse>;
     delete(id: number): Observable<FileResponse>;
 }
@@ -327,8 +328,14 @@ export class TodoListsClient implements ITodoListsClient {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
     }
 
-    get(): Observable<TodosVm> {
-        let url_ = this.baseUrl + "/api/TodoLists";
+    get(text: string | null, priority: string | null): Observable<TodosVm> {
+        let url_ = this.baseUrl + "/api/TodoLists/{text}/{priority}";
+        if (text === undefined || text === null)
+            throw new Error("The parameter 'text' must be defined.");
+        url_ = url_.replace("{text}", encodeURIComponent("" + text));
+        if (priority === undefined || priority === null)
+            throw new Error("The parameter 'priority' must be defined.");
+        url_ = url_.replace("{priority}", encodeURIComponent("" + priority));
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -354,6 +361,54 @@ export class TodoListsClient implements ITodoListsClient {
     }
 
     protected processGet(response: HttpResponseBase): Observable<TodosVm> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = TodosVm.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    get2(): Observable<TodosVm> {
+        let url_ = this.baseUrl + "/api/TodoLists";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGet2(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGet2(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<TodosVm>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<TodosVm>;
+        }));
+    }
+
+    protected processGet2(response: HttpResponseBase): Observable<TodosVm> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -428,7 +483,7 @@ export class TodoListsClient implements ITodoListsClient {
         return _observableOf(null as any);
     }
 
-    get2(id: number): Observable<FileResponse> {
+    get3(id: number): Observable<FileResponse> {
         let url_ = this.baseUrl + "/api/TodoLists/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -444,11 +499,11 @@ export class TodoListsClient implements ITodoListsClient {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processGet2(response_);
+            return this.processGet3(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processGet2(response_ as any);
+                    return this.processGet3(response_ as any);
                 } catch (e) {
                     return _observableThrow(e) as any as Observable<FileResponse>;
                 }
@@ -457,7 +512,7 @@ export class TodoListsClient implements ITodoListsClient {
         }));
     }
 
-    protected processGet2(response: HttpResponseBase): Observable<FileResponse> {
+    protected processGet3(response: HttpResponseBase): Observable<FileResponse> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :

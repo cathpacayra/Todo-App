@@ -9,10 +9,15 @@ namespace Todo_App.WebUI.Controllers;
 
 public class TodoListsController : ApiControllerBase
 {
-    [HttpGet]
+    [HttpGet("{text}/{priority}")]
+    public async Task<ActionResult<TodosVm>> Get(string? text, string? priority)
+    {
+        return await Mediator.Send(new GetTodosQuery {Text = text ,  Priority = priority });
+    }
+    [HttpGet()]
     public async Task<ActionResult<TodosVm>> Get()
     {
-        return await Mediator.Send(new GetTodosQuery());
+        return await Mediator.Send(new GetTodosQuery { Text = null, Priority = null });
     }
 
     [HttpGet("{id}")]
