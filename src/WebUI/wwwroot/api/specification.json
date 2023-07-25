@@ -557,6 +557,9 @@
             "type": "string",
             "nullable": true
           },
+          "isDeletedList": {
+            "type": "boolean"
+          },
           "items": {
             "type": "array",
             "items": {
@@ -591,6 +594,9 @@
           "note": {
             "type": "string",
             "nullable": true
+          },
+          "isDeleted": {
+            "type": "boolean"
           }
         }
       },
