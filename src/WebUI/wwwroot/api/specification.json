@@ -519,6 +519,12 @@
               "$ref": "#/components/schemas/PriorityLevelDto"
             }
           },
+          "colours": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ColorDto"
+            }
+          },
           "lists": {
             "type": "array",
             "items": {
@@ -538,6 +544,18 @@
           "name": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "ColorDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "colour": {
+            "type": "string"
+          },
+          "colorCode": {
+            "type": "string"
           }
         }
       },
@@ -613,6 +631,10 @@
             "format": "int32"
           },
           "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "color": {
             "type": "string",
             "nullable": true
           }

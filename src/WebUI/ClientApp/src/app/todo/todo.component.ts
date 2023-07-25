@@ -60,7 +60,7 @@ export class TodoComponent implements OnInit {
 
   // Lists
   remainingItems(list: TodoListDto): number {
-    return list.items.filter(t => !t.done && !t.isDeleted).length;
+    return list.items.filter(t => !t.done).length;
   }
 
   showNewListModal(template: TemplateRef<any>): void {
@@ -132,7 +132,6 @@ export class TodoComponent implements OnInit {
 
   deleteListConfirmed(): void {
     const list = this.listOptionsEditor as UpdateTodoListCommand;
-    list.isDeletedList = true;
     this.listsClient.delete(this.selectedList.id).subscribe(
       () => {
         this.deleteListModalRef.hide();
